@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:5000
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/mydatabase
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    driver: bridge
+
+# HUMAN ASSISTANCE NEEDED
+# Please review the following:
+# 1. Ensure that the frontend and backend Dockerfile paths are correct
+# 2. Verify the database credentials and update them if necessary
+# 3. Check if any additional environment variables are required for the services
+# 4. Confirm if any additional services (e.g., Redis, Elasticsearch) need to be added
