@@ -1,0 +1,29 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import App from './app';
+import { store } from './store/store';
+import { ApiService } from './services/api';
+import { AuthService } from './services/auth';
+
+const apiService = new ApiService();
+const authService = new AuthService();
+
+const renderApp = () => {
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    console.error('Root element not found');
+    return;
+  }
+
+  ReactDOM.render(
+    <React.StrictMode>
+      <Provider store={store}>
+        <App />
+      </Provider>
+    </React.StrictMode>,
+    rootElement
+  );
+};
+
+renderApp();
