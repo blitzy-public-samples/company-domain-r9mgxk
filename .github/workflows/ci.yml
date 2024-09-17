@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Node.js dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Run backend tests
+      run: |
+        cd backend
+        python -m pytest --cov=. --cov-report=xml
+
+    - name: Run frontend tests
+      run: |
+        cd frontend
+        npm run test -- --coverage
+
+    - name: Run linting and code style checks
+      run: |
+        cd backend
+        flake8 .
+        black --check .
+        cd ../frontend
+        npm run lint
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: |
+          backend/pytest.xml
+          frontend/coverage
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./backend/coverage.xml,./frontend/coverage/coverage-final.json
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+
+# HUMAN ASSISTANCE NEEDED
+# Please review the following:
+# 1. Ensure that the Python and Node.js versions are correct for your project.
+# 2. Verify that the paths to the backend and frontend directories are correct.
+# 3. Confirm that the test commands and coverage report generation are appropriate for your project setup.
+# 4. Add any additional steps or customizations specific to your project's needs.
+# 5. Set up the CODECOV_TOKEN secret in your GitHub repository settings if you're using Codecov for coverage reports.
